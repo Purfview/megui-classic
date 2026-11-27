@@ -1015,6 +1015,7 @@ namespace MeGUI
 
         private void VideoPlayer_Shown(object sender, EventArgs e)
         {
+		    LayoutTransport();
             Size oSizeScreen = Screen.GetWorkingArea(this).Size;
             Point oLocation = Screen.GetWorkingArea(this).Location;
             int iScreenHeight = oSizeScreen.Height - 2 * SystemInformation.FixedFrameBorderSize.Height;
