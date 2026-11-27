@@ -515,6 +515,17 @@ namespace MeGUI
             this.Size = new Size(totalWidth, totalHeight);
 
             ResumeLayout(false);
+
+            // Force recalculation of the scrollable area
+            videoPanel.AutoScroll = false;
+            videoPanel.AutoScrollMinSize = Size.Empty;
+            videoPanel.AutoScroll = true;
+            videoPanel.AutoScrollPosition = Point.Empty;
+            videoPanel.AutoScrollMinSize = new Size(
+                Math.Max(videoPreview.Right, videoPanel.ClientSize.Width),
+                Math.Max(videoPreview.Bottom, videoPanel.ClientSize.Height));
+            videoPanel.PerformLayout();
+
             sizeLock = false;
         }
 
