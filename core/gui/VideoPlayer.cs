@@ -527,10 +527,16 @@ namespace MeGUI
             videoPanel.PerformLayout();
 
             MessageBox.Show(
-                $"Panel: {videoPanel.ClientSize.Width} x {videoPanel.ClientSize.Height}\n" +
-                $"Preview: {videoPreview.Width} x {videoPreview.Height}\n" +
-                $"Scroll area: {videoPanel.AutoScrollMinSize.Width} x {videoPanel.AutoScrollMinSize.Height}\n" +
-                $"Vertical scrollbar: {videoPanel.VerticalScroll.Visible}");
+                $"Form client: {ClientSize.Width} x {ClientSize.Height}\n" +
+                $"Panel bounds: {videoPanel.Bounds}\n" +
+                $"Panel client: {videoPanel.ClientSize}\n" +
+                $"Panel right: {videoPanel.Right}\n" +
+                $"Form right: {ClientRectangle.Right}\n" +
+                $"Right margin: {ClientRectangle.Right - videoPanel.Right}\n" +
+                $"Vertical scrollbar visible: {videoPanel.VerticalScroll.Visible}\n" +
+                $"Vertical scrollbar enabled: {videoPanel.VerticalScroll.Enabled}\n" +
+                $"Vertical maximum: {videoPanel.VerticalScroll.Maximum}\n" +
+                $"Vertical large change: {videoPanel.VerticalScroll.LargeChange}");
 
             sizeLock = false;
         }
