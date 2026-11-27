@@ -287,10 +287,9 @@ namespace MeGUI
         {
             bOriginalSize = true;
             zoomWidth = (int)file.VideoInfo.Width;
-            // never make the window larger than the screen: fall back to the largest size that fits
-            if (zoomMaxWidth > 0 && zoomWidth > zoomMaxWidth)
-                zoomWidth = zoomMaxWidth;
-            zoomFactor = (int)((double)zoomWidth / zoomMaxWidth * 100.0);
+            zoomFactor = zoomMaxWidth > 0
+                ? (int)((double)zoomWidth / zoomMaxWidth * 100.0)
+                : 100;
             SetZoomButtons();
             resize(zoomWidth, showPAR.Checked);
         }
