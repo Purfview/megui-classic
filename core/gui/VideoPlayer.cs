@@ -496,6 +496,11 @@ namespace MeGUI
             int previewOffsetY = Math.Max(0, (videoPanelHeight - videoWindowHeight) / 2);
             videoPreview.Location = new Point(previewOffsetX, previewOffsetY);
 
+            // Explicitly define the scrollable area for both dimensions
+            videoPanel.AutoScrollMinSize = new Size(
+                previewOffsetX + videoWindowWidth,
+                previewOffsetY + videoWindowHeight);
+
             // Set buttonPanel just below videoPanel
             buttonPanel.Size = new Size(videoPanelWidth, buttonPanel.Height);
             buttonPanel.Location = new Point(videoPanel.Left, videoPanel.Bottom);
