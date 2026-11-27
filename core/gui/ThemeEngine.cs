@@ -51,6 +51,8 @@ namespace MeGUI.core.gui
             public bool HooksSet;
             public OverlayPainter Painter;
             public ListHeaderPainter HeaderPainter;
+            public bool CompositedStyleSaved;
+            public bool OriginalHadCompositedStyle;
         }
 
         private static readonly ConditionalWeakTable<Control, Memo> memos = new ConditionalWeakTable<Control, Memo>();
@@ -58,6 +60,93 @@ namespace MeGUI.core.gui
         private static SynchronizationContext uiContext;
         private static bool installed;
         #endregion
+
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_COMPOSITED = 0x02000000;
+
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOZORDER = 0x0004;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_FRAMECHANGED = 0x0020;
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongW", ExactSpelling = true)]
+        private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongW", ExactSpelling = true)]
+        private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", ExactSpelling = true)]
+        private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW", ExactSpelling = true)]
+        private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+        [DllImport("user32.dll", ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetWindowPos(
+            IntPtr hWnd, IntPtr hWndInsertAfter,
+            int X, int Y, int cx, int cy, uint uFlags);
+
+        private static int GetExtendedStyle(IntPtr hwnd)
+        {
+            if (IntPtr.Size == 8)
+                return unchecked((int)GetWindowLongPtr64(hwnd, GWL_EXSTYLE).ToInt64());
+
+            return GetWindowLong32(hwnd, GWL_EXSTYLE);
+        }
+
+        private static void SetExtendedStyle(IntPtr hwnd, int style)
+        {
+            if (IntPtr.Size == 8)
+                SetWindowLongPtr64(hwnd, GWL_EXSTYLE, new IntPtr((long)(uint)style));
+            else
+                SetWindowLong32(hwnd, GWL_EXSTYLE, style);
+
+            SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        }
+
+        private static void SetComposited(Form form, Memo memo, bool enable)
+        {
+            if (!form.IsHandleCreated)
+                return;
+
+            try
+            {
+                IntPtr hwnd = form.Handle;
+                int style = GetExtendedStyle(hwnd);
+                bool hasStyle = (style & WS_EX_COMPOSITED) != 0;
+
+                if (enable)
+                {
+                    if (!memo.CompositedStyleSaved)
+                    {
+                        memo.OriginalHadCompositedStyle = hasStyle;
+                        memo.CompositedStyleSaved = true;
+                    }
+
+                    if (!hasStyle)
+                        SetExtendedStyle(hwnd, style | WS_EX_COMPOSITED);
+                }
+                else if (memo.CompositedStyleSaved)
+                {
+                    int restoredStyle = memo.OriginalHadCompositedStyle
+                        ? style | WS_EX_COMPOSITED
+                        : style & ~WS_EX_COMPOSITED;
+
+                    if (restoredStyle != style)
+                        SetExtendedStyle(hwnd, restoredStyle);
+
+                    memo.CompositedStyleSaved = false;
+                }
+            }
+            catch (Exception)
+            {
+                // Keep normal painting if the Windows API call fails.
+            }
+        }
 
         #region installation
         /// <summary>
@@ -309,6 +398,7 @@ namespace MeGUI.core.gui
                 ApplyNativeTheme(c, true);
                 Form f = c as Form;
                 if (f != null)
+                    SetComposited(f, m, true);
                     ApplyTitleBar(f);
             }
         }
@@ -330,6 +420,7 @@ namespace MeGUI.core.gui
 
             if (form != null)
             {
+                SetComposited(form, m, true);
                 SetColor(c, "BackColor", p.Window, undo);
                 SetColor(c, "ForeColor", p.Text, undo);
                 ApplyTitleBar(form);
@@ -465,6 +556,7 @@ namespace MeGUI.core.gui
             Form f = c as Form;
             if (f != null)
             {
+                SetComposited(f, m, true);
                 ApplyTitleBar(f);
                 ApplyMenu(f, false);
             }
