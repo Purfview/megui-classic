@@ -3,12 +3,14 @@ name: Build Windows binaries
 on:
   push:
     branches:
-      - main
+      # - main
+      - '**'
     tags:
       - '*'
   pull_request:
     branches:
-      - main
+      # - main
+      - '**'
   workflow_dispatch:
 
 permissions:
@@ -56,7 +58,7 @@ jobs:
             !dist/MeGUI_${{ matrix.platform }}/**/*.pdb
             !dist/MeGUI_${{ matrix.platform }}/*.xml
           if-no-files-found: error
-          retention-days: 60
+          retention-days: 14
 
       # Make a Release when a tag is pushed
       - name: Extract release notes
