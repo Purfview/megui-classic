@@ -526,6 +526,12 @@ namespace MeGUI
                 Math.Max(videoPreview.Bottom, videoPanel.ClientSize.Height));
             videoPanel.PerformLayout();
 
+            MessageBox.Show(
+                $"Panel: {videoPanel.ClientSize.Width} x {videoPanel.ClientSize.Height}\n" +
+                $"Preview: {videoPreview.Width} x {videoPreview.Height}\n" +
+                $"Scroll area: {videoPanel.AutoScrollMinSize.Width} x {videoPanel.AutoScrollMinSize.Height}\n" +
+                $"Vertical scrollbar: {videoPanel.VerticalScroll.Visible}");
+
             sizeLock = false;
         }
 
