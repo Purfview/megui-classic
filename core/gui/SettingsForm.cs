@@ -32,6 +32,17 @@ namespace MeGUI
 	/// </summary>
 	public partial class SettingsForm : Form
 	{
+        // Prevent theme flicker during initial window painting
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return cp;
+            }
+        }
+	
 		#region variables
         private MeGUISettings internalSettings = new MeGUISettings();
         private XmlDocument ContextHelp = new XmlDocument();
