@@ -509,8 +509,8 @@ namespace MeGUI
             int totalHeight = videoPanel.Height + buttonPanel.Height + SystemInformation.CaptionHeight
                 + 2 * SystemInformation.FixedFrameBorderSize.Height + MainForm.Instance.Settings.DPIRescale(12);
             int totalWidth = videoPanelWidth + 2 * SystemInformation.FixedFrameBorderSize.Width + MainForm.Instance.Settings.DPIRescale(12);
-            if (totalWidth > iScreenWidth) totalWidth = iScreenWidth;
-            if (totalHeight > iScreenHeight) totalHeight = iScreenHeight;
+            if (totalWidth > oSizeScreen.Width) totalWidth = oSizeScreen.Width;
+            if (totalHeight > oSizeScreen.Height) totalHeight = oSizeScreen.Height;
 
             this.Size = new Size(totalWidth, totalHeight);
 
