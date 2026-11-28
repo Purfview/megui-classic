@@ -403,26 +403,29 @@ namespace MeGUI
             // Calculate the largest video size that fits the screen,
             // regardless of whether the source video is smaller or larger.
 
-            Dar d = new Dar(file.VideoInfo.Width, file.VideoInfo.Height);
+            Dar fitAspectRatio = new Dar(file.VideoInfo.Width, file.VideoInfo.Height);
 
             if (showPAR.Checked)
-                d = arChooser.Value ?? d;
+                fitAspectRatio = arChooser.Value ?? fitAspectRatio;
 
-            int maxVideoHeight = Math.Max(1, iScreenHeight - formHeightDelta);
+            int fitAvailableHeight = Math.Max(1, iScreenHeight - formHeightDelta);
 
             // First fit to available width
             zoomMaxWidth = iScreenWidth;
-            int height = (int)Math.Round((decimal)zoomMaxWidth / d.AR);
+
+            int fitCalculatedHeight = (int)Math.Round(
+                (decimal)zoomMaxWidth / fitAspectRatio.AR);
 
             // If the resulting height is too large, fit to available height instead
-            if (height > maxVideoHeight)
+            if (fitCalculatedHeight > fitAvailableHeight)
             {
-                height = maxVideoHeight;
-                zoomMaxWidth = (int)Math.Round((decimal)height * d.AR);
+                fitCalculatedHeight = fitAvailableHeight;
+                zoomMaxWidth = (int)Math.Round(
+                    (decimal)fitCalculatedHeight * fitAspectRatio.AR);
             }
 
             videoWindowWidth = zoomMaxWidth;
-            videoWindowHeight = height;
+            videoWindowHeight = fitCalculatedHeight;
 
             if (zoomFactor != 100)
             {
