@@ -313,10 +313,13 @@ namespace MeGUI
         private void btnFitScreen_Click(object sender, EventArgs e)
         {
             bOriginalSize = false;
+            // Preserve the previous width for the existing size-change check
             zoomWidth = zoomMaxWidth;
             zoomFactor = 100;
-            SetZoomButtons();
             SetMaxZoomWidth();
+            // Use the newly calculated maximum width
+            zoomWidth = zoomMaxWidth;
+            SetZoomButtons();
             resize(zoomWidth, showPAR.Checked);
         }
 
@@ -397,38 +400,29 @@ namespace MeGUI
             int iScreenHeight = oSizeScreen.Height - 2 * SystemInformation.FixedFrameBorderSize.Height;
             int iScreenWidth = oSizeScreen.Width - 2 * SystemInformation.FixedFrameBorderSize.Width;
 
-            // does the video fit into the screen?
-            if ((int)file.VideoInfo.Height + formHeightDelta > iScreenHeight ||
-                (int)file.VideoInfo.Width > iScreenWidth)
-            {
-                Dar d = new Dar(file.VideoInfo.Width, file.VideoInfo.Height);
-                if (showPAR.Checked) d = arChooser.Value ?? d;
+            // Calculate the largest video size that fits the screen,
+            // regardless of whether the source video is smaller or larger.
 
-                int height;
-                if ((int)file.VideoInfo.Width > iScreenWidth)
-                {
-                    zoomMaxWidth = iScreenWidth;
-                    height = (int)Math.Round((decimal)zoomMaxWidth / d.AR);
-                    if (height + formHeightDelta > iScreenHeight)
-                    {
-                        height = iScreenHeight - formHeightDelta;
-                        zoomMaxWidth = (int)Math.Round((decimal)height * d.AR);
-                    }
-                }
-                else
-                {
-                    height = iScreenHeight - formHeightDelta;
-                    zoomMaxWidth = (int)Math.Round((decimal)height * d.AR);
-                }
-                videoWindowWidth = zoomMaxWidth;
-                videoWindowHeight = height;
-            }
-            else
+            Dar d = new Dar(file.VideoInfo.Width, file.VideoInfo.Height);
+
+            if (showPAR.Checked)
+                d = arChooser.Value ?? d;
+
+            int maxVideoHeight = Math.Max(1, iScreenHeight - formHeightDelta);
+
+            // First fit to available width
+            zoomMaxWidth = iScreenWidth;
+            int height = (int)Math.Round((decimal)zoomMaxWidth / d.AR);
+
+            // If the resulting height is too large, fit to available height instead
+            if (height > maxVideoHeight)
             {
-                zoomMaxWidth = (int)file.VideoInfo.Width;
-                videoWindowWidth = zoomMaxWidth;
-                videoWindowHeight = (int)file.VideoInfo.Height;
+                height = maxVideoHeight;
+                zoomMaxWidth = (int)Math.Round((decimal)height * d.AR);
             }
+
+            videoWindowWidth = zoomMaxWidth;
+            videoWindowHeight = height;
 
             if (zoomFactor != 100)
             {
