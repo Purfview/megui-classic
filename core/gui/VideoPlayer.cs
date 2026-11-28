@@ -513,6 +513,11 @@ namespace MeGUI
             if (totalHeight > oSizeScreen.Height) totalHeight = oSizeScreen.Height;
 
             this.Size = new Size(totalWidth, totalHeight);
+			
+            // Ensure panels never extend beyond the actual form client area
+            int actualPanelWidth = Math.Min(videoPanelWidth, this.ClientSize.Width);
+            videoPanel.Width = actualPanelWidth;
+            buttonPanel.Width = actualPanelWidth;
 
             ResumeLayout(false);
 
