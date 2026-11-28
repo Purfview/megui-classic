@@ -466,6 +466,9 @@ namespace MeGUI
             SuspendLayout();
             sizeLock = true;
 
+            // Reset previous scroll position before changing video dimensions
+            videoPanel.AutoScrollPosition = Point.Empty;
+
             // Get screen dimensions
             Size oSizeScreen = Screen.GetWorkingArea(this).Size;
             int iScreenWidth = oSizeScreen.Width - 2 * SystemInformation.FixedFrameBorderSize.Width;
